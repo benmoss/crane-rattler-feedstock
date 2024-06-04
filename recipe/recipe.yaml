@@ -1,0 +1,45 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/prefix-dev/recipe-format/main/schema.json
+
+context:
+  version: "0.19.1"
+
+package:
+  name: crane
+  version: ${{ version }}
+
+source:
+  url: https://github.com/google/go-containerregistry/archive/refs/tags/v${{ version }}.tar.gz
+  sha256: 2a03430b0c9a8cf3fdfde2608aed99f851e5c57dfed8246bcc637d03a7ab0048
+
+build:
+  script:
+    - if: unix
+      then:
+        - export GOOS=linux
+    - if: osx
+      then:
+        - export GOOS=osx
+    - if: x86_64
+      then:
+        - export GOARCH=amd64
+    - if: arm64
+      then:
+        - export GOARCH=arm64
+    - go build -v -ldflags "-w -s -X github.com/google/go-containerregistry/cmd/crane/cmd.Version=${{version}}" -o $PREFIX/bin/crane ./cmd/crane
+
+requirements:
+  build:
+    - go-nocgo
+
+tests:
+  - script:
+      - if: build_platform == target_platform
+        then: crane version
+
+about:
+  homepage: https://github.com/google/go-containerregistry/tree/main/cmd/crane
+  license: Apache-2.0
+  license_file:
+    - LICENSE
+  description: "A tool for interacting with remote OCI images and registries."
+  summary: "A tool for interacting with remote OCI images and registries."
